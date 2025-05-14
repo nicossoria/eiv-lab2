@@ -35,36 +35,34 @@ SPDX-License-Identifier: MIT
 
 /* === Private variable definitions ================================================================================ */
 
-static const alumno_t YO_aux = {
-    .nombre = "Martin",
-    .apellido = "Soria",
-    .documento = 44616308
-};
-
 /* === Punteros ==================================================================================================== */
-static const alumno_t *YO = &YO_aux;
+static alumno_t YO = NULL;
 /* === Public variable definitions ================================================================================= */
 
 /* === Private function definitions ================================================================================ */
 
 /* === Public function implementation ============================================================================== */
 
-int main(void)
-{
+int main(void) {
     char buffer[100];
     int resultado;
 
-    resultado = Serializar(YO, buffer, sizeof(buffer));
+    YO = CrearAlumno("Martin", "Soria", 44616308);
 
-    if (resultado > 0)
-    {
-        printf("Serializado: %s\n", buffer);
+    if (YO == NULL) {
+        printf("Error al crear el alumno\n");
+        return -1;
     }
-    else
-    {
+
+    resultado = SerializarAlumno(YO, buffer, sizeof(buffer));
+
+    if (resultado > 0) {
+        printf("Serializado: %s\n", buffer);
+    } else {
         printf("Error al serializar\n");
     }
 
+    LiberarAlumno(YO);
+    
 }
-
 /* === End of documentation ======================================================================================== */

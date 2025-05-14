@@ -27,11 +27,20 @@ SPDX-License-Identifier: MIT
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* === Macros definitions ========================================================================================== */
 
+#define MAX_NOMBRE 32
+#define MAX_APELLIDO 32
+
 /* === Private data type declarations ============================================================================== */
 
+struct alumno_s {
+    char nombre[MAX_NOMBRE];
+    char apellido[MAX_APELLIDO];
+    uint32_t documento;
+};
 /* === Private function declarations =============================================================================== */
 
 static int SerializarCadena(const char *campo, const char *valor, char *buffer, uint32_t disponibles);
@@ -42,6 +51,43 @@ static int SerializarDocumento(const char *campo, uint32_t valor, char *buffer, 
 /* === Public variable definitions ================================================================================= */
 
 /* === Private function definitions ================================================================================ */
+
+/**
+ * @brief Funcion para crear un nuevo alumno
+ * 
+ * @param nombre Nombre del alumno
+ * @param apellido Apellido del alumno
+ * @param documento Documento del alumno
+ * @return alumno_t Puntero al nuevo alumno o NULL si hubo error
+ */
+
+alumno_t CrearAlumno(const char *nombre, const char *apellido, uint32_t documento) {
+    alumno_t nuevo = malloc(sizeof(struct alumno_s));
+    if (nuevo == NULL) {
+        return NULL;
+    }
+    strncpy(nuevo->nombre, nombre, MAX_NOMBRE - 1);
+    nuevo->nombre[MAX_NOMBRE - 1] = '\0'; 
+
+    strncpy(nuevo->apellido, apellido, MAX_APELLIDO - 1);
+    nuevo->apellido[MAX_APELLIDO - 1] = '\0';
+
+    nuevo->documento = documento;
+
+    return nuevo;
+}
+
+/**
+ * @brief Funcion para liberar la memoria ocupada por un alumno
+ * 
+ * @param alumno Puntero al alumno a liberar
+ */
+
+void LiberarAlumno(alumno_t alumno) {
+    if (alumno != NULL) {
+        free(alumno);
+    }
+}
 
 /**
  * @brief Funcion para serializar un campo y su valor
@@ -71,7 +117,8 @@ static int SerializarDocumento(const char *campo, uint32_t valor, char *buffer, 
 
 /* === Public function definitions ============================================================================== */
 
-int Serializar(const alumno_t *alumno, char *buffer, uint32_t size){
+
+int SerializarAlumno(alumno_t alumno, char *buffer, uint32_t size){
     int escritos = 0;
     int resultado;
 
@@ -98,6 +145,10 @@ int Serializar(const alumno_t *alumno, char *buffer, uint32_t size){
     }
     escritos += resultado;
 
+    // Eliminar la última coma
+    if (escritos > 0 && buffer[escritos - 1] == ',') {
+        escritos--; 
+    }
     if (escritos >= size - 1) {
         return -1; // No hay espacio para el cierre
     }
